@@ -1,0 +1,17 @@
+<launch>
+    
+    <arg name="temp_thr_min" default="32.0" />
+    <arg name="temp_thr_max" default="39.5" />
+    <arg name="component_thr" default="400" />
+    <arg name="component_width" default="110" />
+    <arg name="contour_area_min" default="30" />
+    
+    <node pkg="reid_thermal" type="reid_thermal" name="reid_thermal" output="screen" respawn="true">
+        <param name="temp_thr_min" value="$(arg temp_thr_min)" type="double"/>
+        <param name="temp_thr_max" value="$(arg temp_thr_max)" type="double"/>
+        <param name="component_thr" value="$(arg component_thr)" type="int"/>
+        <param name="component_width" value="$(arg component_width)" type="int"/>
+        <param name="contour_area_min" value="$(arg contour_area_min)" type="int"/>
+    </node>       
+
+</launch> 
