@@ -26,16 +26,15 @@ endif()
 ## Declare ROS messages and services ##
 #######################################
 
-# add_message_files(
-#  FILES
-#  UpperBodyDetector.msg
-# )
+add_message_files(
+  FILES
+  ReidResult.msg
+)
 
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-#   geometry_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 #generate_dynamic_reconfigure_options(
 #  cfg/reidentifier.cfg
@@ -75,18 +74,10 @@ add_executable(reid_thermal
     src/svm.cpp
 ) 
 
-add_executable(train
-    src/train.cpp 
-    src/svm.cpp
-) 
-
 add_dependencies(reid_thermal irimager
   irimageprocessing
   ircore ${reid_thermal_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#add_dependencies(reid_thermal ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-add_dependencies(train irimager
-  irimageprocessing
-  ircore ${reid_thermal_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(reid_thermal ${PROJECT_NAME}_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(reid_thermal irimager
   irimageprocessing
@@ -96,13 +87,6 @@ target_link_libraries(reid_thermal irimager
   ${Boost_LIBRARIES}
 )
 
-target_link_libraries(train irimager
-  irimageprocessing
-  ircore
-  udev
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
 #############
 ## Install ##
 #############
@@ -123,11 +107,6 @@ install(TARGETS reid_thermal
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS train
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
 
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}

@@ -24,10 +24,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "svm.h"
 
+#include "reid_thermal/ReidResult.h"
+
+using namespace reid_thermal;
 // Optris
 evo::ImageBuilder image_builder_;
 image_transport::Publisher reid_pub_;
-ros::Publisher pub_phy, pub_phy_level;
+ros::Publisher reid_result_pub_;
 unsigned char* thermal_buffer_ = NULL;
 double** temperature_map_;
 
@@ -717,16 +720,17 @@ void thermalImageCallback(const sensor_msgs::ImageConstPtr& raw_image) {
     //        cv::imwrite(fileout.str().c_str(),color_image);
 
 
-    // Show FPS.
-    if(fps_size_ == 11) {
-        double fps = 11.0 / (fps_times_[10]-fps_times_[0]);
-        std::ostringstream ss;
-        ss << round(fps*10)/10.0;
-        cv::putText(clrImg, ss.str()+"fps", cv::Point(cv_ptr->image.cols-80, cv_ptr->image.rows-12), 3, 0.6, cv::Scalar(255, 255, 255));
-    }
 
-
+    ReidResult result_msg;
+    result_msg.header = raw_image->header;
+    std::ostringstream recognizedName;
+    recognizedName << tags[predictedID-1];
+    result_msg.name = recognizedName.str();
+    result_msg.confidence = predictedConf*100;
 //    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(),"bgr8",color_image_cv).toImageMsg();
+
+    reid_result_pub_.publish(result_msg);
+
     reid_pub_.publish(cv_ptr->toImageMsg());
 }
 
@@ -807,7 +811,8 @@ int main(int argc, char **argv) {
     image_transport::ImageTransport it(nh);
     image_transport::Subscriber thermal_image_sub = it.subscribe("thermal_image", 100, thermalImageCallback); // raw image
 
-    reid_pub_ = it.advertise("/reid_thermal/reid_result", 1);
+    reid_pub_ = it.advertise("/reid_thermal/reid_result_image", 1);
+    reid_result_pub_ = nh.advertise<ReidResult>("/reid_thermal/reid_result", 1);
 
     ros::spin();
 
